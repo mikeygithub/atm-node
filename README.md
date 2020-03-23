@@ -32,7 +32,7 @@ ATM-NODE
 
 - [vue-cli4.x](https://cli.vuejs.org/)
 - [ElementUI](https://element.eleme.cn/#/zh-CN/component/installation)
-- [severless](http://doc.bmob.cn/data/wechat_app_new/index.html)
+- [severless](https://serverless.com)
 - [nodejs](https://nodejs.org/en/)
 
 ## 项目设置

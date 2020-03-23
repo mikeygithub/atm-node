@@ -4,8 +4,8 @@
  */
 
 function validateBankCard (cardNum, Bmob){
-    const query = Bmob.Query('_User');
-    query.equalTo("username","==",cardNum)
+    const query = Bmob.Query('Account');
+    query.equalTo("account","==",cardNum)
     query.find().then(res => {
         console.log(res)
     });
