@@ -47,4 +47,4 @@ ATM-NODE
 
 ## 效果展示
 
-![avatar](./src/assets/img/main.jpg)
+![avatar](./src/assets/img/main.png)

@@ -25,19 +25,6 @@ function validateBankCardWithCode(card, pwd,Bmob) {
 }
 
 /**
- * 退出
- */
-function logout() {
-    console.log('退出')
-}
-/**
- * 按键点击事件
- * @param num
- */
-function numberClick(num) {
-    console.log(num)
-}
-/**
  * 存钱、取钱、
  * @param account
  * @param number
@@ -87,12 +74,30 @@ function transfer(send, receipt, number,Bmob) {
 function cellularPhoneReplenishing(account, phone, Bmob) {
     console.log(account+phone+Bmob)
 }
-
+/**
+ * 按键点击事件
+ * @param num
+ */
+function numberClick(num) {
+    console.log(num)
+}
+/**
+ * 退出
+ */
+function logout() {
+    console.log('退出')
+}
 export default {
     // Vue.js的插件应当有一个公开方法 install。这个方法的第一个参数是 Vue 构造器，第二个参数是一个可选的选项对象。
     install: function (Vue) {
         Vue.prototype.validateBankCard = (card,Bmob) => validateBankCard(card,Bmob)
         Vue.prototype.validateBankCardWithCode = (card,pwd,Bmob) => validateBankCardWithCode(card,pwd,Bmob)
+        Vue.prototype.withdrayMoney = (account,number,wOrd,Bmob) => withdrayMoney(account,number,wOrd,Bmob)
+        Vue.prototype.checkTheBalance = (account,Bmob) => checkTheBalance(account,Bmob)
+        Vue.prototype.detailedQuery = (account,Bmob) => detailedQuery(account,Bmob)
+        Vue.prototype.transfer = (send, receipt, number,Bmob) => transfer(send, receipt, number,Bmob)
+        Vue.prototype.cellularPhoneReplenishing = (account, phone, Bmob) => cellularPhoneReplenishing(account, phone, Bmob)
         Vue.prototype.numberClick = (param) => numberClick(param)
+        Vue.prototype.logout = (card,Bmob) => logout(card,Bmob)
     }
 }
