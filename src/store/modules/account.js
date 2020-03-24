@@ -20,7 +20,13 @@ const account = {
             state.account = {}
         },
         SET_STATUS: (state) =>{
-          state.status = state.status++
+            state.status += 1
+        },
+        STATUS: (state,status) =>{
+          state.status = status
+        },
+        CLEAR_STATUS: (state) =>{
+            state.status = 0
         }
 
     },

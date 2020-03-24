@@ -41,18 +41,19 @@
             </el-col>
         </el-row>
         <el-row :gutter="20">
+            <!--荧幕-->
             <el-col :span="16">
                 <div class="grid-content-hight bg-purple right-box-plus" style="text-align: center">
                     <el-row>
-                        <el-input type="textarea" :rows="23" readonly="" placeholder="请选择业务 1:取款 2:存款 0:退出"
-                                  v-model="screenContent"></el-input>
+                        <el-input type="textarea" :rows="23" readonly="" v-model="screenContent"></el-input>
                     </el-row>
                 </div>
             </el-col>
+            <!--按键-->
             <el-col :span="8">
                 <div class="grid-content-hight bg-purple right-box">
                     <el-row style="padding: 10px">
-                        <el-input type="textarea" readonly="" :rows="8" placeholder="请输入内容"
+                        <el-input type="textarea" readonly="" :rows="8" placeholder=""
                                   v-model="printContent"></el-input>
                     </el-row>
                     <el-row>
@@ -86,7 +87,8 @@
                 <div class="grid-content bg-purple">
                     <el-row style="line-height: 50px">
                         <el-button @click="openShoutDownDialog">关机</el-button>
-                        <el-button @click="openDialog">插卡</el-button>
+                        <el-button @click="openDialog" v-show="buttonValue">插卡</el-button>
+                        <el-button @click="exit" v-show="!buttonValue">拔卡</el-button>
                     </el-row>
                 </div>
             </el-col>
@@ -115,7 +117,19 @@
                 }
             }
             return {
-                screenContent: '',
+                //收款人
+                receipt: '',
+                //数目
+                balance: '',
+                //选择的业务
+                optionBusine: '',
+                //错误输入密码次数
+                errorPasswordCount: 0,
+                //手机号码
+                phoneNumber: '',
+                buttonValue: true,
+                cardPassword: '',
+                screenContent: this.CONST.SCREEN_INIT_CONTENT,
                 printContent: '',
                 codeVisible: false,
                 dialogVisible: false,
@@ -136,6 +150,18 @@
             }
         },
         methods: {
+            exit() {
+                this.$notify({
+                    title: '操作成功',
+                    message: '成功拔出银行卡',
+                    type: 'success'
+                });
+                //清理
+                this.$store.commit('CLEAR_ACCOUNT')
+                this.$store.commit('CLEAR_STATUS')
+                this.screenContent = this.CONST.SCREEN_INIT_CONTENT
+                this.buttonValue = !this.buttonValue
+            },
             print() {
                 this.$notify({
                     title: '操作成功',
@@ -170,22 +196,24 @@
                                         type: 'success'
                                     });
                                     //存储卡号
-                                    this.$store.commit("SET_ACCOUNT",res.data[0])
+                                    this.$store.commit("SET_ACCOUNT", res.data[0])
                                     this.$store.commit("SET_STATUS")
+                                    this.screenContent = this.CONST.SCREEN_INPUT_PASSWORD
+                                    this.buttonValue = !this.buttonValue
                                     this.dialogVisible = false;
-                                    console.log('账号:'+this.$store.getters.account.account)
-                                    console.log('状态:'+this.$store.getters.status)
-                                }else {
-                                        this.$notify({
-                                            title: '操作成功',
-                                            message: '卡号不存在',
-                                            type: 'warning'
-                                        });
-                                        //清除账号信息
-                                    console.log('账号:'+this.$store.getters.account.account)
+                                    console.log('账号:' + this.$store.getters.account.account)
+                                    console.log('状态:' + this.$store.getters.status)
+                                } else {
+                                    this.$notify({
+                                        title: '操作成功',
+                                        message: '卡号不存在',
+                                        type: 'warning'
+                                    });
+                                    //清除账号信息
+                                    console.log('账号:' + this.$store.getters.account.account)
                                 }
                             } else {
-                                this.$notify({
+                                this.$notify.error({
                                     title: '操作失败',
                                     message: '请联系系统管理员',
                                 });
@@ -221,12 +249,288 @@
                 })
             },
             //按键
-            handleKeymap(key){
-                console.log(key)
-                switch (key) {
-                    case 1,2,3,4,5,6,7,8,9,0:break;
-                    case 10,11:break
+            handleKeymap(key) {
+                let status = this.$store.getters.status
+                console.log(status)
+                if (status === 0) {
+                    this.screenContent = this.CONST.SCREEN_INIT_CONTENT
+                    this.$notify.error({
+                        title: '操作提示',
+                        message: '请插入银行卡',
+                    });
+                    return
                 }
+                switch (key) {
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 8:
+                    case 9:
+                        //处理密码
+                        if (status === 1) {
+                            this.screenContent += '*'
+                            this.cardPassword += key
+                        }
+                        //业务选择：1:取款 2:存款 3:转账 4:查询明细 5:查询余额 6:手机充值 0:退出
+                        if (status === 2 && key === 0) {
+                            this.screenContent = this.CONST.SCREEN_BUSINE_CONTENT
+                        }
+                        //取款
+                        if (status === 2 && key === 1) {
+                            this.screenContent = this.CONST.SCREEN_INPUT_BALANCE
+                            this.$store.commit("STATUS", 3)
+                        }
+                        //存款
+                        if (status === 2 && key === 2) {
+                            this.screenContent = this.CONST.SCREEN_INPUT_BALANCE
+                            this.$store.commit("STATUS", 4)
+                        }
+                        //转帐
+                        if (status === 2 && key === 3) {
+                            this.screenContent = this.CONST.SCREEN_RECEIPT_ACCOUNT
+                            this.$store.commit("STATUS", 5)
+                        }
+                        //明细
+                        if (status === 2 && key === 4) {
+                            this.handleDetailedQuery()
+                        }
+                        //余额查询
+                        if (status === 2 && key === 5) {
+                            this.checkTheBalance(this.$store.getters.account.account).then(res=>{
+                                if (res.code === 200) {
+                                    this.screenContent = this.CONST.SCREEN_QUERY_SUCCESS + res.data[0].balance
+                                }
+                            })
+                        }
+                        //手机充值
+                        if (status === 2 && key === 6) {
+                            this.screenContent = this.CONST.SCREEN_INPUT_PHONE
+                            this.$store.commit("STATUS", 7)
+                        }
+                        // 处理具体业务 status：3:取款 4:存款 5转账: 6:查询明细 7:查询余额 8:手机充值 9:退出
+                        // 1:取款  输入金额->扣除金额  1-2-3
+                        if (status === 3) {
+                            this.screenContent += key
+                            this.balance += key
+                        }
+                        // 2:存款  输入金额->扣除金额
+                        if (status === 4) {
+                            this.screenContent += key
+                            this.balance += key
+                        }
+                        // 3:转账  输入账号->输入金额->进行转账
+                        if (status === 5) {
+                            this.screenContent += key
+                            this.receipt += key
+                        }
+                        if (status === 6) {
+                            this.screenContent += key
+                            this.balance += key
+                        }
+                        if (status === 7) {
+                            this.screenContent += key
+                            this.phoneNumber += key
+                        }
+                        if (status === 8) {
+                            this.screenContent += key
+                            this.balance += key
+                        }
+                        // if ()
+                        // 4:查询明细  显示明细
+                        // 5:查询余额  显示金额
+                        // 6:手机充值 输入手机->进行充值
+                        // 0:退出
+
+                        if (status === 0) {
+                            console.log('具体业务')
+                        }
+                        break;
+                    case 10:
+                        // 验证账号密码正确性
+                        if (status === 1 && this.cardPassword != '' && this.cardPassword != null) {
+                            this.handleValidate()
+                        }
+                        if (status === 2) {
+                            this.screenContent = this.CONST.SCREEN_BUSINE_CONTENT
+                        }
+                        // 取款
+                        if (status === 3 && this.balance != '' && this.balance != null) {
+                            this.handleWithdrayMoney()
+                        }
+                        // 存款
+                        if (status === 4 && this.balance != '' && this.balance != null) {
+                            this.handleDepositMoney()
+                        }
+                        // 转账:1 输入收款方账号
+                        if (status === 5 && this.receipt != '' && this.receipt != null) {
+                            this.$store.commit("STATUS", 6)
+                            this.screenContent = this.CONST.SCREEN_INPUT_BALANCE
+                        }
+                        // 转账:2 输入金额
+                        if (status === 6 && this.balance != '' && this.balance != null) {
+                            this.handleTranfer()
+                        }
+                        // 手机充值:1 获取手机号
+                        if (status === 7 && this.phoneNumber != '' && this.phoneNumber != null) {
+                            this.$store.commit("STATUS", 6)
+                            this.screenContent = this.CONST.SCREEN_INPUT_BALANCE
+                        }
+                        // 手机充值:2 获取
+                        if (status === 8 && this.balance != '' && this.balance != null) {
+                            this.handlePhone()
+                        }
+                        break;
+                    case 11:
+                        //取消
+                        if (this.$store.getters.status === 1) {
+                            this.screenContent = this.CONST.SCREEN_INPUT_PASSWORD
+                            this.cardPassword = ''
+                        }
+                        break
+                }
+            },
+            //校验账户和密码
+            handleValidate() {
+                console.log(this.cardPassword)
+                this.validateBankCardWithCode(this.$store.getters.account.account, this.cardPassword).then(res => {
+                    if (res.code === 200) {
+                        console.log(res)
+                        if (res.data.length != 0) {
+                            //存储卡号
+                            this.$store.commit("SET_ACCOUNT", res.data[0])
+                            this.$store.commit("SET_STATUS")
+                            this.screenContent = this.CONST.SCREEN_BUSINE_CONTENT
+                        } else {
+                            this.$notify({
+                                title: '操作成功',
+                                message: '密码错误',
+                                type: 'warning'
+                            });
+                        }
+                    } else {
+                        this.$notify.error({
+                            title: '操作提示',
+                            message: '请联系系统管理员',
+                        });
+                    }
+                })
+            },
+            //取款
+            handleWithdrayMoney() {
+                this.checkTheBalance(this.$store.getters.account.account).then(res => {
+                    if (res.data[0].balance >= this.balance) {
+                        this.withdrayMoney(this.$store.getters.account.account, this.balance, 0).then(res => {
+                            if (res.code === 200) {
+                                this.saveDetailed(this.$store.getters.account.account, this.balance, 0).then(res => {
+                                    if (res.code === 200) {
+                                        this.$store.commit("STATUS", 2)
+                                        this.screenContent = this.CONST.SCREEN_BUSINE_SUCCESS
+                                        this.balance = ''
+                                    }
+                                })
+                            }
+                        })
+                    }else {
+                        this.$store.commit("STATUS", 2)
+                        this.screenContent = this.CONST.SCREEN_BALANCE_NOT_ENOUGH
+                        this.balance = ''
+                    }
+                })
+            },
+            //存款
+            handleDepositMoney() {
+                this.withdrayMoney(this.$store.getters.account.account, this.balance, 1).then(res => {
+                    if (res.code === 200) {
+                        this.saveDetailed(this.$store.getters.account.account, this.balance, 1).then(res => {
+                            if (res.code === 200) {
+                                this.$store.commit("STATUS", 2)
+                                this.screenContent = this.CONST.SCREEN_BUSINE_SUCCESS
+                                this.balance = ''
+                            }
+                        })
+                    }
+                })
+            },
+            //转帐
+            handleTranfer() {
+                //1.check balance more number
+                this.checkTheBalance(this.$store.getters.account.account).then(res => {
+                    console.log(res)
+                    if (res.data[0].balance >= this.balance) {
+                        //2.send balance
+                        this.withdrayMoney(this.$store.getters.account.account, this.balance, 0).then(res => {
+                            if (res.code === 200) {
+                                this.saveDetailed(this.$store.getters.account.account, this.balance, 0).then(res => {
+                                    if (res.code === 200) {
+                                        //3.receipt balance
+                                        this.withdrayMoney(this.receipt, this.balance, 1).then(res => {
+                                            if (res.code === 200) {
+                                                //4.writer detail
+                                                this.saveDetailed(this.receipt, this.balance, 1).then(res => {
+                                                    if (res.code === 200) {
+                                                        this.$store.commit("STATUS", 2)
+                                                        this.screenContent = this.CONST.SCREEN_BUSINE_SUCCESS
+                                                        this.receipt = ''
+                                                        this.balance = ''
+                                                    }
+                                                })
+                                            }
+                                        })
+                                    }
+                                })
+                            }
+                        })
+                    }else {
+                        this.$store.commit("STATUS", 2)
+                        this.screenContent = this.CONST.SCREEN_BALANCE_NOT_ENOUGH
+                        this.receipt = ''
+                        this.balance = ''
+                    }
+                })
+            },
+            //查询明细
+            handleDetailedQuery() {
+                this.detailedQuery(this.$store.getters.account.account).then(res=>{
+                    if (res.code === 200){
+                        let detail = this.CONST.SCREEN_BALANCE_DETAIL
+                        res.data.forEach(v=>{
+                            detail += `\t${v.account}\t\t${v.type}\t\t${v.number}\t\t${v.createdAt.substring(0,10)}\n`
+                        })
+                        this.screenContent = detail
+                    } else {
+                        this.$notify.error({
+                            title: '操作提示',
+                            message: '请联系系统管理员',
+                        });
+                    }
+                })
+            },
+            //手机充值
+            handlePhone(){
+                this.checkTheBalance(this.$store.getters.account.account).then(res => {
+                    if (res.data[0].balance >= this.balance) {
+                        this.withdrayMoney(this.$store.getters.account.account, this.balance, 0).then(res => {
+                            if (res.code === 200) {
+                                this.saveDetailed(this.$store.getters.account.account, this.balance, 0).then(res => {
+                                    if (res.code === 200) {
+                                        this.$store.commit("STATUS", 2)
+                                        this.screenContent = this.CONST.SCREEN_BUSINE_SUCCESS
+                                        this.balance = ''
+                                    }
+                                })
+                            }
+                        })
+                    }else {
+                        this.$store.commit("STATUS", 2)
+                        this.screenContent = this.CONST.SCREEN_BALANCE_NOT_ENOUGH
+                        this.balance = ''
+                    }
+                })
             }
         }
     }
