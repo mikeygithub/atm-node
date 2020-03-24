@@ -56,24 +56,24 @@
                                   v-model="printContent"></el-input>
                     </el-row>
                     <el-row>
-                        <el-button>1</el-button>
-                        <el-button>2</el-button>
-                        <el-button>3</el-button>
+                        <el-button @click="handleKeymap(1)">1</el-button>
+                        <el-button @click="handleKeymap(2)">2</el-button>
+                        <el-button @click="handleKeymap(3)">3</el-button>
                     </el-row>
                     <el-row>
-                        <el-button>4</el-button>
-                        <el-button>5</el-button>
-                        <el-button>6</el-button>
+                        <el-button @click="handleKeymap(4)">4</el-button>
+                        <el-button @click="handleKeymap(5)">5</el-button>
+                        <el-button @click="handleKeymap(6)">6</el-button>
                     </el-row>
                     <el-row>
-                        <el-button>7</el-button>
-                        <el-button>8</el-button>
-                        <el-button>9</el-button>
+                        <el-button @click="handleKeymap(7)">7</el-button>
+                        <el-button @click="handleKeymap(8)">8</el-button>
+                        <el-button @click="handleKeymap(9)">9</el-button>
                     </el-row>
                     <el-row>
-                        <el-button>确认</el-button>
-                        <el-button>0</el-button>
-                        <el-button>取消</el-button>
+                        <el-button @click="handleKeymap(10)">确认</el-button>
+                        <el-button @click="handleKeymap(0)">0</el-button>
+                        <el-button @click="handleKeymap(11)">取消</el-button>
                     </el-row>
                     <el-row>
                         <el-button style="width: 320px" plain @click="print">打印凭条</el-button>
@@ -170,14 +170,19 @@
                                         type: 'success'
                                     });
                                     //存储卡号
-
+                                    this.$store.commit("SET_ACCOUNT",res.data[0])
+                                    this.$store.commit("SET_STATUS")
                                     this.dialogVisible = false;
+                                    console.log('账号:'+this.$store.getters.account.account)
+                                    console.log('状态:'+this.$store.getters.status)
                                 }else {
                                         this.$notify({
                                             title: '操作成功',
                                             message: '卡号不存在',
                                             type: 'warning'
                                         });
+                                        //清除账号信息
+                                    console.log('账号:'+this.$store.getters.account.account)
                                 }
                             } else {
                                 this.$notify({
@@ -214,6 +219,14 @@
                         this.codeVisible = false
                     }
                 })
+            },
+            //按键
+            handleKeymap(key){
+                console.log(key)
+                switch (key) {
+                    case 1,2,3,4,5,6,7,8,9,0:break;
+                    case 10,11:break
+                }
             }
         }
     }

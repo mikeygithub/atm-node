@@ -31,6 +31,7 @@ ATM-NODE
 ## 技术架构
 
 - [vue-cli4.x](https://cli.vuejs.org/)
+- [vuex](https://vuex.vuejs.org/)
 - [ElementUI](https://element.eleme.cn/#/zh-CN/component/installation)
 - [severless](https://serverless.com)
 - [nodejs](https://nodejs.org/en/)
