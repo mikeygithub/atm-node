@@ -1,13 +1,15 @@
+import Bmob from '@/bmob/bmob'
+
 /**
  * 验证卡号是否存在
  * @param cardNum
  */
 
-function validateBankCard (cardNum, Bmob){
-    const query = Bmob.Query('Account');
+function validateBankCard (cardNum){
+    let query = Bmob.BmobApi.Query("Account");
     query.equalTo("account","==",cardNum)
-    query.find().then(res => {
-        console.log(res)
+    return new Promise((resolve, reject) => {
+        query.find().then(res => resolve({ code: 200, data: res })).catch(err => reject(err));
     });
 }
 
@@ -16,7 +18,7 @@ function validateBankCard (cardNum, Bmob){
  * @param card
  * @param pwd
  */
-function validateBankCardWithCode(card, pwd,Bmob) {
+function validateBankCardWithCode(card, pwd) {
     Bmob.User.login(card,pwd).then(res => {
         console.log(res)
     }).catch(err => {
@@ -30,8 +32,8 @@ function validateBankCardWithCode(card, pwd,Bmob) {
  * @param number
  * @param Bmob
  */
-function withdrayMoney(account,number,wOrd,Bmob) {
-    console.log(account+number+wOrd+Bmob)
+function withdrayMoney(account,number,wOrd) {
+    console.log(account+number+wOrd)
     //withdray
     //deposit
 }
@@ -41,8 +43,8 @@ function withdrayMoney(account,number,wOrd,Bmob) {
  * @param account
  * @param Bmob
  */
-function checkTheBalance(account,Bmob) {
-    console.log(account+Bmob)
+function checkTheBalance(account) {
+    console.log(account)
 }
 
 /**
@@ -50,8 +52,8 @@ function checkTheBalance(account,Bmob) {
  * @param account
  * @param Bmob
  */
-function detailedQuery(account, Bmob) {
-    console.log(account+Bmob)
+function detailedQuery(account) {
+    console.log(account)
 }
 
 /**
@@ -61,8 +63,8 @@ function detailedQuery(account, Bmob) {
  * @param number
  * @param Bmob
  */
-function transfer(send, receipt, number,Bmob) {
-    console.log(send+receipt+number+Bmob)
+function transfer(send, receipt, number) {
+    console.log(send+receipt+number)
 }
 
 /**
@@ -71,8 +73,8 @@ function transfer(send, receipt, number,Bmob) {
  * @param phone
  * @param Bmob
  */
-function cellularPhoneReplenishing(account, phone, Bmob) {
-    console.log(account+phone+Bmob)
+function cellularPhoneReplenishing(account, phone) {
+    console.log(account+phone)
 }
 /**
  * 按键点击事件
@@ -90,14 +92,14 @@ function logout() {
 export default {
     // Vue.js的插件应当有一个公开方法 install。这个方法的第一个参数是 Vue 构造器，第二个参数是一个可选的选项对象。
     install: function (Vue) {
-        Vue.prototype.validateBankCard = (card,Bmob) => validateBankCard(card,Bmob)
-        Vue.prototype.validateBankCardWithCode = (card,pwd,Bmob) => validateBankCardWithCode(card,pwd,Bmob)
-        Vue.prototype.withdrayMoney = (account,number,wOrd,Bmob) => withdrayMoney(account,number,wOrd,Bmob)
-        Vue.prototype.checkTheBalance = (account,Bmob) => checkTheBalance(account,Bmob)
-        Vue.prototype.detailedQuery = (account,Bmob) => detailedQuery(account,Bmob)
-        Vue.prototype.transfer = (send, receipt, number,Bmob) => transfer(send, receipt, number,Bmob)
-        Vue.prototype.cellularPhoneReplenishing = (account, phone, Bmob) => cellularPhoneReplenishing(account, phone, Bmob)
+        Vue.prototype.validateBankCard = (card) => validateBankCard(card)
+        Vue.prototype.validateBankCardWithCode = (card,pwd) => validateBankCardWithCode(card,pwd)
+        Vue.prototype.withdrayMoney = (account,number,wOrd) => withdrayMoney(account,number,wOrd)
+        Vue.prototype.checkTheBalance = (account) => checkTheBalance(account)
+        Vue.prototype.detailedQuery = (account) => detailedQuery(account)
+        Vue.prototype.transfer = (send, receipt, number) => transfer(send, receipt, number)
+        Vue.prototype.cellularPhoneReplenishing = (account, phone) => cellularPhoneReplenishing(account, phone)
         Vue.prototype.numberClick = (param) => numberClick(param)
-        Vue.prototype.logout = (card,Bmob) => logout(card,Bmob)
+        Vue.prototype.logout = (card) => logout(card)
     }
 }

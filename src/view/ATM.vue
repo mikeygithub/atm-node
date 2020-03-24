@@ -11,7 +11,7 @@
                     <el-input placeholder="请输入您的卡号" v-model="dataForm.card" clearable></el-input>
                 </el-form-item>
             </el-form>
-                <span slot="footer" class="dialog-footer">
+            <span slot="footer" class="dialog-footer">
                     <el-button @click="dialogVisible = false">取 消</el-button>
                     <el-button type="primary" @click="handleEnter">确 定</el-button>
                 </span>
@@ -95,7 +95,8 @@
 </template>
 
 <script>
-    import { isNumber,isShoutDownCode } from '@/utils/validate'
+    import {isNumber, isShoutDownCode} from '@/utils/validate'
+
     export default {
         name: "ATM",
         data() {
@@ -142,15 +143,15 @@
                     type: 'success'
                 });
             },
-            openDialog(){
+            openDialog() {
                 this.dialogVisible = true
-                this.$nextTick(()=>{
+                this.$nextTick(() => {
                     this.$refs['dataForm'].resetFields()
                 })
             },
             openShoutDownDialog() {
                 this.codeVisible = true
-                this.$nextTick(()=>{
+                this.$nextTick(() => {
                     this.$refs['dataForm'].resetFields()
                 })
             },
@@ -159,22 +160,33 @@
                 this.$refs['dataForm'].validate((valid) => {
                     if (valid) {
                         //检查卡号是否存在
-                        this.validateBankCard(this.dataForm.card,this.Bmob)
-                        // this.validateBankCardWithCode('123456','123456',this.Bmob)
-                        // if (true){
-                        //     this.$notify({
-                        //         title: '操作成功',
-                        //         message: '卡号验证成功请进行下一步',
-                        //         type: 'success'
-                        //     });
-                        // } else {
-                        //     this.$notify({
-                        //         title: '操作成功',
-                        //         message: '卡号不存在',
-                        //         type: 'success'
-                        //     });
-                        // }
-                        this.dialogVisible = false;
+                        this.validateBankCard(this.dataForm.card).then(res => {
+                            if (res.code == 200) {
+                                if (res.data.length != 0) {
+                                    console.log(res.data)
+                                    this.$notify({
+                                        title: '操作成功',
+                                        message: '卡号验证成功请进行下一步',
+                                        type: 'success'
+                                    });
+                                    //存储卡号
+
+                                    this.dialogVisible = false;
+                                }else {
+                                        this.$notify({
+                                            title: '操作成功',
+                                            message: '卡号不存在',
+                                            type: 'warning'
+                                        });
+                                }
+                            } else {
+                                this.$notify({
+                                    title: '操作失败',
+                                    message: '请联系系统管理员',
+                                });
+
+                            }
+                        })
                     }
                 })
             },
@@ -210,9 +222,12 @@
 <style scoped>
     .el-row {
         margin-bottom: 20px;
-        &:last-child {
-             margin-bottom: 0;
-        }
+
+    &
+    :last-child {
+        margin-bottom: 0;
+    }
+
     }
     .el-col {
         border-radius: 4px;
