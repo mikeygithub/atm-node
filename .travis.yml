@@ -1,0 +1,26 @@
+language: node_js
+services:
+  - docker
+sudo: required
+node_js:
+  - 10.16.1
+branches:
+  only:
+    - master
+install:
+  - npm install
+script:
+  - npm run build
+  - docker build . -t "mikeyboom/atm-node:latest"
+addons:
+  ssh_known_hosts:
+    - $SERVER_IP
+after_success:
+  - chmod 600 ~/.ssh/id_rsa
+  - docker login -u=$DOCKER_NAME -p="$DOKCER_PWD"
+  - docker push mikeyboom/atm-node:latest
+  - ssh -o "StrictHostKeyChecking no" -i id_rsa root@$SERVER_IP "rm -rf atm-node;git clone https:github.com/mikeygithub/atm-node.git;cd atm-node;docker-compose pull; docker-compose -f docker-compose.yml up -d;exit"
+before_install:
+  - openssl aes-256-cbc -K $encrypted_1687bb340939_key -iv $encrypted_1687bb340939_iv  -in id_rsa.enc -out ~/.ssh/id_rsa -d
+  - chmod 600 ~/.ssh/id_rsa
+  - echo -e "Host $SERVER_IP\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config

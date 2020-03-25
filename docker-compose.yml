@@ -1,0 +1,6 @@
+version: '2'
+services:
+  atm-node:
+    image: mikeyboom/atm-node
+    ports:
+      - 8008:8008
