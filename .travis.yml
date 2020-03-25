@@ -17,7 +17,7 @@ addons:
     - $SERVER_IP
 after_success:
   - chmod 600 ~/.ssh/id_rsa
-  - docker login -u=$DOCKER_NAME -p=$DOKCER_PWD
+  - docker login -u=$DOCKER_NAME -p="$DOCKER_PWD"
   - docker push mikeyboom/atm-node:latest
   - ssh -o "StrictHostKeyChecking no" -i id_rsa root@$SERVER_IP "rm -rf atm-node;git clone https://github.com/mikeygithub/atm-node.git;cd atm-node;docker-compose pull; docker-compose -f docker-compose.yml up -d;exit"
 before_install:
