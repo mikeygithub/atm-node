@@ -42,7 +42,7 @@
         </el-row>
         <el-row :gutter="20">
             <!--荧幕-->
-            <el-col :span="16">
+            <el-col :span="16" :xs="8" :sm="8" :md="10" :lg="14" :xl="16">
                 <div class="grid-content-hight bg-purple right-box-plus" style="text-align: center">
                     <el-row>
                         <el-input type="textarea" :rows="23" readonly="" v-model="screenContent"></el-input>
@@ -50,7 +50,7 @@
                 </div>
             </el-col>
             <!--按键-->
-            <el-col :span="8">
+            <el-col :span="8" :xs="16" :sm="16" :md="14" :lg="10" :xl="8">
                 <div class="grid-content-hight bg-purple right-box">
                     <el-row style="padding: 10px">
                         <el-input type="textarea" readonly="" :rows="8" placeholder=""
@@ -77,7 +77,7 @@
                         <el-button @click="handleKeymap(11)">取消</el-button>
                     </el-row>
                     <el-row>
-                        <el-button style="width: 320px" plain @click="print">打印凭条</el-button>
+                        <el-button style="width: 90%" plain @click="print">打印凭条</el-button>
                     </el-row>
                 </div>
             </el-col>
@@ -86,9 +86,9 @@
             <el-col :span="24">
                 <div class="grid-content bg-purple">
                     <el-row style="line-height: 50px">
-                        <el-button @click="openShoutDownDialog">关机</el-button>
-                        <el-button @click="openDialog" v-show="buttonValue">插卡</el-button>
-                        <el-button @click="exit" v-show="!buttonValue">拔卡</el-button>
+                        <el-button @click="openShoutDownDialog" v-show="this.$store.getters.account.type === 1" style="width: 20%">关机</el-button>
+                        <el-button @click="openDialog" v-show="buttonValue" style="width: 20%">插卡</el-button>
+                        <el-button @click="exit" v-show="!buttonValue" style="width: 20%;">拔卡</el-button>
                     </el-row>
                 </div>
             </el-col>
@@ -160,14 +160,43 @@
                 this.$store.commit('CLEAR_ACCOUNT')
                 this.$store.commit('CLEAR_STATUS')
                 this.screenContent = this.CONST.SCREEN_INIT_CONTENT
+                this.cardPassword = ''
+                //收款人
+                this.receipt = ''
+                //数目
+                this.balance = ''
+                //选择的业务
+                this.optionBusine = ''
+                //手机号码
+                this.phoneNumber = ''
                 this.buttonValue = !this.buttonValue
             },
             print() {
-                this.$notify({
-                    title: '操作成功',
-                    message: '打印凭条成功',
-                    type: 'success'
-                });
+                if (this.$store.getters.status != 0 && this.$store.getters.status != 1) {
+                    this.$notify({
+                        title: '操作成功',
+                        message: '打印凭条成功',
+                        type: 'success'
+                    });
+                }else {
+                    this.$notify.error({
+                        title: '操作失败',
+                        message: '打印凭条失败、请先办理业务'
+                    });
+                }
+            },
+            //清理信息
+            cleanTmpData() {
+                //收款人
+                this.receipt = ''
+                //数目
+                this.balance = ''
+                //选择的业务
+                this.optionBusine = ''
+                //手机号码
+                this.phoneNumber = ''
+                //状态
+                this.$store.commit("STATUS", 2)
             },
             openDialog() {
                 this.dialogVisible = true
@@ -196,6 +225,7 @@
                                         type: 'success'
                                     });
                                     //存储卡号
+                                    res.data[0].type = 0
                                     this.$store.commit("SET_ACCOUNT", res.data[0])
                                     this.$store.commit("SET_STATUS")
                                     this.screenContent = this.CONST.SCREEN_INPUT_PASSWORD
@@ -277,8 +307,9 @@
                             this.cardPassword += key
                         }
                         //业务选择：1:取款 2:存款 3:转账 4:查询明细 5:查询余额 6:手机充值 0:退出
+                        //退出
                         if (status === 2 && key === 0) {
-                            this.screenContent = this.CONST.SCREEN_BUSINE_CONTENT
+                            this.exit()
                         }
                         //取款
                         if (status === 2 && key === 1) {
@@ -301,7 +332,7 @@
                         }
                         //余额查询
                         if (status === 2 && key === 5) {
-                            this.checkTheBalance(this.$store.getters.account.account).then(res=>{
+                            this.checkTheBalance(this.$store.getters.account.account).then(res => {
                                 if (res.code === 200) {
                                     this.screenContent = this.CONST.SCREEN_QUERY_SUCCESS + res.data[0].balance
                                 }
@@ -377,7 +408,7 @@
                         }
                         // 手机充值:1 获取手机号
                         if (status === 7 && this.phoneNumber != '' && this.phoneNumber != null) {
-                            this.$store.commit("STATUS", 6)
+                            this.$store.commit("STATUS", 8)
                             this.screenContent = this.CONST.SCREEN_INPUT_BALANCE
                         }
                         // 手机充值:2 获取
@@ -390,6 +421,10 @@
                         if (this.$store.getters.status === 1) {
                             this.screenContent = this.CONST.SCREEN_INPUT_PASSWORD
                             this.cardPassword = ''
+                        }
+                        if (status === 2 || status === 3 || status === 4 || status === 5 || status === 6 || status === 7 || status === 8) {
+                            this.cleanTmpData()
+                            this.screenContent = this.CONST.SCREEN_BUSINE_CONTENT
                         }
                         break
                 }
@@ -405,6 +440,11 @@
                             this.$store.commit("SET_ACCOUNT", res.data[0])
                             this.$store.commit("SET_STATUS")
                             this.screenContent = this.CONST.SCREEN_BUSINE_CONTENT
+                            this.$notify({
+                                title: '操作成功',
+                                message: '请选择要办理的业务',
+                                type: 'success'
+                            });
                         } else {
                             this.$notify({
                                 title: '操作成功',
@@ -426,7 +466,7 @@
                     if (res.data[0].balance >= this.balance) {
                         this.withdrayMoney(this.$store.getters.account.account, this.balance, 0).then(res => {
                             if (res.code === 200) {
-                                this.saveDetailed(this.$store.getters.account.account, this.balance, 0).then(res => {
+                                this.saveDetailed(this.$store.getters.account.account, this.balance, 0, this.$store.getters.account.account).then(res => {
                                     if (res.code === 200) {
                                         this.$store.commit("STATUS", 2)
                                         this.screenContent = this.CONST.SCREEN_BUSINE_SUCCESS
@@ -435,7 +475,7 @@
                                 })
                             }
                         })
-                    }else {
+                    } else {
                         this.$store.commit("STATUS", 2)
                         this.screenContent = this.CONST.SCREEN_BALANCE_NOT_ENOUGH
                         this.balance = ''
@@ -446,7 +486,7 @@
             handleDepositMoney() {
                 this.withdrayMoney(this.$store.getters.account.account, this.balance, 1).then(res => {
                     if (res.code === 200) {
-                        this.saveDetailed(this.$store.getters.account.account, this.balance, 1).then(res => {
+                        this.saveDetailed(this.$store.getters.account.account, this.balance, 1, this.$store.getters.account.account).then(res => {
                             if (res.code === 200) {
                                 this.$store.commit("STATUS", 2)
                                 this.screenContent = this.CONST.SCREEN_BUSINE_SUCCESS
@@ -465,13 +505,13 @@
                         //2.send balance
                         this.withdrayMoney(this.$store.getters.account.account, this.balance, 0).then(res => {
                             if (res.code === 200) {
-                                this.saveDetailed(this.$store.getters.account.account, this.balance, 0).then(res => {
+                                this.saveDetailed(this.$store.getters.account.account, this.balance, 0, this.receipt).then(res => {
                                     if (res.code === 200) {
                                         //3.receipt balance
                                         this.withdrayMoney(this.receipt, this.balance, 1).then(res => {
                                             if (res.code === 200) {
                                                 //4.writer detail
-                                                this.saveDetailed(this.receipt, this.balance, 1).then(res => {
+                                                this.saveDetailed(this.receipt, this.balance, 1, this.$store.getters.account.account).then(res => {
                                                     if (res.code === 200) {
                                                         this.$store.commit("STATUS", 2)
                                                         this.screenContent = this.CONST.SCREEN_BUSINE_SUCCESS
@@ -485,7 +525,7 @@
                                 })
                             }
                         })
-                    }else {
+                    } else {
                         this.$store.commit("STATUS", 2)
                         this.screenContent = this.CONST.SCREEN_BALANCE_NOT_ENOUGH
                         this.receipt = ''
@@ -495,11 +535,11 @@
             },
             //查询明细
             handleDetailedQuery() {
-                this.detailedQuery(this.$store.getters.account.account).then(res=>{
-                    if (res.code === 200){
+                this.detailedQuery(this.$store.getters.account.account).then(res => {
+                    if (res.code === 200) {
                         let detail = this.CONST.SCREEN_BALANCE_DETAIL
-                        res.data.forEach(v=>{
-                            detail += `\t${v.account}\t\t${v.type}\t\t${v.number}\t\t${v.createdAt.substring(0,10)}\n`
+                        res.data.forEach(v => {
+                            detail += `${v.account}\t\t${v.type}\t\t${v.number}\t\t${v.from}\t\t${v.createdAt.substring(0, 10)}\n`
                         })
                         this.screenContent = detail
                     } else {
@@ -511,12 +551,13 @@
                 })
             },
             //手机充值
-            handlePhone(){
+            handlePhone() {
                 this.checkTheBalance(this.$store.getters.account.account).then(res => {
                     if (res.data[0].balance >= this.balance) {
+                        console.log(this.$store.getters.account.account)
                         this.withdrayMoney(this.$store.getters.account.account, this.balance, 0).then(res => {
                             if (res.code === 200) {
-                                this.saveDetailed(this.$store.getters.account.account, this.balance, 0).then(res => {
+                                this.saveDetailed(this.$store.getters.account.account, this.balance, 0, this.phoneNumber).then(res => {
                                     if (res.code === 200) {
                                         this.$store.commit("STATUS", 2)
                                         this.screenContent = this.CONST.SCREEN_BUSINE_SUCCESS
@@ -525,7 +566,7 @@
                                 })
                             }
                         })
-                    }else {
+                    } else {
                         this.$store.commit("STATUS", 2)
                         this.screenContent = this.CONST.SCREEN_BALANCE_NOT_ENOUGH
                         this.balance = ''
@@ -582,7 +623,7 @@
     }
 
     .right-box .el-button {
-        width: 100px;
+        width: 30%;
     }
 
     >>> textarea {

@@ -5,7 +5,8 @@ const account = {
             objectId: '',
             account: '',
             password: '',
-            balance: ''
+            balance: '',
+            type: 0,
         }
     },
     getters: {

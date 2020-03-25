@@ -34,23 +34,24 @@ function validateBankCardWithCode(card, pwd) {
  * @param Bmob
  */
 function withdrayMoney(account, number, wOrd) {
-
     return new Promise((resolve, reject) => {
-    checkTheBalance(account).then(res => {
-        let balance = res.data[0].balance;
-        //deposit
-        if (wOrd === 1) balance += Number(number)
-        //withdray
-        if (wOrd === 0 && number <= balance) balance = balance - number
-        //un
-        const query = Bmob.BmobApi.Query('Account');
-        query.set('id', res.data[0].objectId) //需要修改的objectId
-        query.set('balance', balance)
-        return new Promise((resolve, reject) => {
-            query.save().then(res => resolve({code: 200, data: res})).catch(err => reject(err));
-        });
-    }).then(res => resolve({code: 200, data: res})).catch(err => reject(err));
-});
+        checkTheBalance(account).then(res => {
+            // console.log(account)
+            // console.log(res)
+            let balance = res.data[0].balance;
+            //deposit
+            if (wOrd === 1) balance += Number(number)
+            //withdray
+            if (wOrd === 0 && number <= balance) balance = balance - number
+            //un
+            const query = Bmob.BmobApi.Query('Account');
+            query.set('id', res.data[0].objectId) //需要修改的objectId
+            query.set('balance', balance)
+            return new Promise((resolve, reject) => {
+                query.save().then(res => resolve({code: 200, data: res})).catch(err => reject(err));
+            });
+        }).then(res => resolve({code: 200, data: res})).catch(err => reject(err));
+    });
 }
 
 /**
@@ -87,15 +88,17 @@ function detailedQuery(account) {
  * @param type
  * @returns {Promise<any>}
  */
-function saveDetailed(account, number, type) {
+function saveDetailed(account, number, type, from) {
     const query = Bmob.BmobApi.Query('Detail');
-    query.set("account",account)
-    query.set("number",number)
-    query.set("type",type===1?'存入':'支出')
+    query.set("account", account)
+    query.set("number", number)
+    query.set("from", from.toString())
+    query.set("type", type === 1 ? '存入' : '支出')
     return new Promise((resolve, reject) => {
         query.save().then(res => resolve({code: 200, data: res})).catch(err => reject(err));
     });
 }
+
 /**
  * 转账
  * @param send
@@ -107,8 +110,8 @@ function transfer(send, receipt, number) {
     //1.check send number more will transfer number
     checkTheBalance(send).then(res => {
         let balance = res.data[0].balance;
-        if (balance>= number){
-            balance-=number
+        if (balance >= number) {
+            balance -= number
             //2.send reduce number
             const query = Bmob.BmobApi.Query('Account');
             query.set('id', res.data[0].objectId) //需要修改的objectId
@@ -119,19 +122,19 @@ function transfer(send, receipt, number) {
         }
         //3.receipt add number
     })
-    checkTheBalance(receipt).then(res=>{
+    checkTheBalance(receipt).then(res => {
         let balance = res.data[0].balance;
-            balance+=number
-            const query = Bmob.BmobApi.Query('Account');
-            query.set('id', res.data[0].objectId) //需要修改的objectId
-            query.set('balance', balance)
-            return new Promise((resolve, reject) => {
-                query.save().then(res => resolve({code: 200, data: res})).catch(err => reject(err));
-            });
+        balance += number
+        const query = Bmob.BmobApi.Query('Account');
+        query.set('id', res.data[0].objectId) //需要修改的objectId
+        query.set('balance', balance)
+        return new Promise((resolve, reject) => {
+            query.save().then(res => resolve({code: 200, data: res})).catch(err => reject(err));
+        });
     })
     //4.writer detail send with receipt
-    saveDetailed(send,number,0)
-    saveDetailed(receipt,number,1)
+    saveDetailed(send, number, 0)
+    saveDetailed(receipt, number, 1)
 }
 
 /**
@@ -141,7 +144,7 @@ function transfer(send, receipt, number) {
  * @param Bmob
  */
 function cellularPhoneReplenishing(account, number) {
-    withdrayMoney(account,number,0)
+    withdrayMoney(account, number, 0)
 }
 
 /**
@@ -167,7 +170,7 @@ export default {
         Vue.prototype.withdrayMoney = (account, number, wOrd) => withdrayMoney(account, number, wOrd)
         Vue.prototype.checkTheBalance = (account) => checkTheBalance(account)
         Vue.prototype.detailedQuery = (account) => detailedQuery(account)
-        Vue.prototype.saveDetailed = (account,number,type) => saveDetailed(account,number,type)
+        Vue.prototype.saveDetailed = (account, number, type, from) => saveDetailed(account, number, type, from)
         Vue.prototype.transfer = (send, receipt, number) => transfer(send, receipt, number)
         Vue.prototype.cellularPhoneReplenishing = (account, phone) => cellularPhoneReplenishing(account, phone)
         Vue.prototype.numberClick = (param) => numberClick(param)
