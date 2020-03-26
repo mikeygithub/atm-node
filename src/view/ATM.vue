@@ -5,7 +5,7 @@
                    :visible.sync="dialogVisible"
                    :show-close=false
                    :close-on-click-modal=false
-                   width="30%">
+                   width="50%">
             <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="handleEnter()">
                 <el-form-item prop="card">
                     <el-input placeholder="请输入您的卡号" v-model="dataForm.card" clearable></el-input>
@@ -21,7 +21,7 @@
                    :visible.sync="codeVisible"
                    :show-close=false
                    :close-on-click-modal=false
-                   width="30%">
+                   width="50%">
             <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="handleEnter()">
                 <el-form-item prop="code">
                     <el-input placeholder="请输入密码" v-model="dataForm.code" clearable></el-input>
