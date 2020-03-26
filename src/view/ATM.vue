@@ -77,7 +77,7 @@
                         <el-button @click="handleKeymap(11)">取消</el-button>
                     </el-row>
                     <el-row>
-                        <el-button style="width: 90%" plain @click="print">打印凭条</el-button>
+                        <el-button style="width: 93%" plain @click="print">打印凭条</el-button>
                     </el-row>
                 </div>
             </el-col>
