@@ -23,7 +23,7 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 120px;
-  margin-left: 5%;
-  margin-right: 5%;
+  margin-left: 2%;
+  margin-right: 2%;
 }
 </style>

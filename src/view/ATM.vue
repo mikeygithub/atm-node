@@ -623,7 +623,7 @@
     }
 
     .right-box .el-button {
-        width: 30%;
+        width: 28%;
     }
 
     >>> textarea {
