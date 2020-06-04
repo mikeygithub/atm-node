@@ -86,7 +86,8 @@
             <el-col :span="24">
                 <div class="grid-content bg-purple">
                     <el-row style="line-height: 50px">
-                        <el-button @click="openShoutDownDialog" v-show="this.$store.getters.account.type === 1" style="width: 20%">关机</el-button>
+                        <!--<el-button @click="openShoutDownDialog" v-show="this.$store.getters.account.type === 1" style="width: 20%">关机</el-button>-->
+                        <el-button @click="openShoutDownDialog" style="width: 20%">关机</el-button>
                         <el-button @click="openDialog" v-show="buttonValue" style="width: 20%">插卡</el-button>
                         <el-button @click="exit" v-show="!buttonValue" style="width: 20%;">拔卡</el-button>
                     </el-row>

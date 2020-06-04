@@ -5,7 +5,9 @@ import Bmob from '@/bmob/bmob'
  * @param cardNum
  */
 
+
 function validateBankCard(cardNum) {
+
     let query = Bmob.BmobApi.Query("Account");
     query.equalTo("account", "==", cardNum)
     return new Promise((resolve, reject) => {
