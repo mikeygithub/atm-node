@@ -17,7 +17,7 @@
                 </span>
         </el-dialog>
         <!--关机确认-->
-        <el-dialog title="关机"
+        <el-dialog :title='this.openAtm==true?"关机":"开机"'
                    :visible.sync="codeVisible"
                    :show-close=false
                    :close-on-click-modal=false
@@ -87,7 +87,7 @@
                 <div class="grid-content bg-purple">
                     <el-row style="line-height: 50px">
                         <!--<el-button @click="openShoutDownDialog" v-show="this.$store.getters.account.type === 1" style="width: 20%">关机</el-button>-->
-                        <el-button @click="openShoutDownDialog" style="width: 20%">关机</el-button>
+                        <el-button @click="openShoutDownDialog" style="width: 20%"><span v-text='this.openAtm==true?"关机":"开机"'></span></el-button>
                         <el-button @click="openDialog" v-show="buttonValue" style="width: 20%">插卡</el-button>
                         <el-button @click="exit" v-show="!buttonValue" style="width: 20%;">拔卡</el-button>
                     </el-row>
@@ -120,6 +120,7 @@
             return {
                 //收款人
                 receipt: '',
+                openAtm: false,
                 //数目
                 balance: '',
                 //选择的业务
@@ -130,7 +131,7 @@
                 phoneNumber: '',
                 buttonValue: true,
                 cardPassword: '',
-                screenContent: this.CONST.SCREEN_INIT_CONTENT,
+                screenContent: this.CONST.SCREEN_INIT_OPEN_CONTENT,
                 printContent: '',
                 codeVisible: false,
                 dialogVisible: false,
@@ -258,23 +259,26 @@
             handleCode() {
                 this.$refs['dataForm'].validate((valid) => {
                     if (valid) {
-                        this.$confirm('此操作将关闭ATM, 是否继续?', '提示', {
-                            confirmButtonText: '确定',
-                            cancelButtonText: '取消',
-                            type: 'warning'
-                        }).then(() => {
+                        // this.$confirm('此操作将'+this.openAtm===true?"关机":"开机"+'ATM, 是否继续?', '提示', {
+                        //     confirmButtonText: '确定',
+                        //     cancelButtonText: '取消',
+                        //     type: 'warning'
+                        // }).then(() => {
                             this.$notify({
                                 title: '操作成功',
-                                message: '已经成功关闭ATM',
+                                message: '已经成功操作',
                                 type: 'success'
                             });
-                        }).catch(() => {
-                            this.$notify({
-                                title: '操作成功',
-                                message: '已经取消关闭ATM',
-                                type: 'success'
-                            });
-                        });
+                            this.openAtm = !this.openAtm
+                        // }).catch(() => {
+                        //     this.$notify({
+                        //         title: '操作成功',
+                        //         message: '已经取消操作',
+                        //         type: 'success'
+                        //     });
+                        // });
+                        if (this.openAtm === true) this.screenContent = this.CONST.SCREEN_INIT_CONTENT
+                        if (this.openAtm === false) this.screenContent = this.CONST.SCREEN_INIT_OPEN_CONTENT
                         this.codeVisible = false
                     }
                 })

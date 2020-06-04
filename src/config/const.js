@@ -1,6 +1,7 @@
 export default {
     BMOB_SECRE_KEY: '102024734a988f4f',
     BMOB_SECORITY_CODE: '123456',
+    SCREEN_INIT_OPEN_CONTENT: '\n\n\n\n\n\n\n\n请开机',
     SCREEN_INIT_CONTENT: '\n\n\n\n\n\n\n\n请插入银行卡',
     SCREEN_INPUT_PASSWORD: '\n\n\n\n\n\n\n\n请输入密码:',
     SCREEN_INPUT_BALANCE: '\n\n\n\n\n\n\n\n请输入金额:',
